@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
-import { Search, BookOpen, TrendingUp, GraduationCap, Calculator, BarChart3 } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, Award, Calculator } from 'lucide-react';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,7 +90,7 @@ export default function Home() {
   };
 
   // Stats - fetch from API for real-time accuracy
-  const [stats, setStats] = useState({ totalCourses: 0, subjects: 0, avgCredits: 0 });
+  const [stats, setStats] = useState({ totalCourses: 0, subjects: 0, mostPopularSubject: '', mostPopularCount: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
   
   useEffect(() => {
@@ -113,15 +114,30 @@ export default function Home() {
         const actualCount = totalCount ? parseInt(totalCount, 10) : data.length;
         
         const subjects = new Set(data.map((c: Course) => c.subject)).size;
-        const totalCredits = data.reduce((sum: number, c: Course) => sum + (c.credits || 0), 0);
-        const avgCredits = actualCount > 0 ? totalCredits / actualCount : 0;
+        
+        // Find most popular subject
+        const subjectCounts = new Map<string, number>();
+        data.forEach((c: Course) => {
+          const count = subjectCounts.get(c.subject) || 0;
+          subjectCounts.set(c.subject, count + 1);
+        });
+        
+        let mostPopularSubject = '';
+        let mostPopularCount = 0;
+        subjectCounts.forEach((count, subject) => {
+          if (count > mostPopularCount) {
+            mostPopularCount = count;
+            mostPopularSubject = subject;
+          }
+        });
         
         console.log(`[Stats] Fetched ${data.length} courses (${actualCount} total), ${subjects} subjects`);
         
         setStats({
           totalCourses: actualCount,
           subjects,
-          avgCredits: Math.round(avgCredits * 10) / 10, // Round to 1 decimal
+          mostPopularSubject,
+          mostPopularCount,
         });
       } catch (error) {
         console.error('[Stats] Error fetching stats:', error);
@@ -167,8 +183,15 @@ export default function Home() {
           
           {/* Hero Section */}
           <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mb-6 shadow-lg">
-              <GraduationCap className="h-10 w-10 text-white" />
+            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 shadow-lg">
+              <Image
+                src="/logo.png"
+                alt="GryphonGrade Logo"
+                width={80}
+                height={80}
+                className="rounded-full"
+                priority
+              />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent transition-colors duration-200">
               GryphonGrade
@@ -213,11 +236,13 @@ export default function Home() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <Award className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCredits.toFixed(1)}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Avg Credits/Course</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.mostPopularSubject || 'N/A'}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Most Popular ({stats.mostPopularCount} courses)
+                    </div>
                   </div>
                 </div>
               </CardContent>
