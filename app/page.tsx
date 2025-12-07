@@ -183,13 +183,13 @@ export default function Home() {
           
           {/* Hero Section */}
           <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 shadow-lg">
+            <div className="inline-flex items-center justify-center mb-6">
               <Image
                 src="/logo.png"
                 alt="GryphonGrade Logo"
                 width={80}
                 height={80}
-                className="rounded-full"
+                className="drop-shadow-lg"
                 priority
               />
             </div>
