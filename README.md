@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎓 GryphonGrade
 
 A modern, full-stack grade calculator for University of Guelph students. Search for courses, calculate your grades, and find out what you need on your final exam.
@@ -265,3 +266,6 @@ MIT
 ---
 
 **Made with ❤️ for UofG students**
+=======
+# gryphongrade
+>>>>>>> dfe24dc087d1bf1d982aa6a951889338419bc49f

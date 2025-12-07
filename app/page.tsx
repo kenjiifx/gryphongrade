@@ -253,14 +253,14 @@ export default function Home() {
                   className="w-full text-lg py-6 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 transition-all"
                   autoFocus
                 />
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 {searchQuery && (
                   <button
                     onClick={() => {
                       setSearchQuery('');
                       setSelectedIndex(-1);
                     }}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
                     ✕
                   </button>
@@ -268,20 +268,20 @@ export default function Home() {
               </div>
 
               {loading && (
-                <div className="mt-4 text-center text-gray-500">
+                <div className="mt-4 text-center text-gray-500 dark:text-gray-400">
                   Loading courses...
                 </div>
               )}
 
               {!loading && searchQuery && searchResults.length > 0 && (
-                <div className="mt-4 border-2 rounded-lg bg-white shadow-lg max-h-96 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="mt-4 border-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 shadow-lg max-h-96 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
                   {searchResults.map((course, index) => (
                     <button
                       key={course.id}
                       onClick={() => handleSelectCourse(course)}
-                      className={`w-full text-left px-4 py-3 hover:bg-blue-50 transition-all duration-200 border-b last:border-b-0 ${
-                        index === selectedIndex ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'hover:border-l-4 hover:border-l-blue-300'
-                      }`}
+                      className={`w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 border-b last:border-b-0 dark:border-gray-700 ${
+                        index === selectedIndex ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500 dark:border-l-blue-400' : 'hover:border-l-4 hover:border-l-blue-300 dark:hover:border-l-blue-600'
+                      } active:scale-[0.98]`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
@@ -317,11 +317,11 @@ export default function Home() {
                   </div>
                 </div>
               )}
-              {!loading && courses.length > 0 && searchQuery && searchResults.length === 0 && (
-                <div className="mt-4 text-center text-gray-500 py-8">
-                  No courses found. Try a different search term.
-                </div>
-              )}
+                {!loading && courses.length > 0 && searchQuery && searchResults.length === 0 && (
+                  <div className="mt-4 text-center text-gray-500 dark:text-gray-400 py-8">
+                    No courses found. Try a different search term.
+                  </div>
+                )}
             </CardContent>
           </Card>
 

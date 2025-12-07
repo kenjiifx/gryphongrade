@@ -165,10 +165,10 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <div className="text-5xl font-bold text-gray-900 mb-2 transition-all duration-300">
+              <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2 transition-all duration-300">
                 {current.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 {completed.toFixed(1)}% of course completed
               </div>
               {current >= 80 && (
