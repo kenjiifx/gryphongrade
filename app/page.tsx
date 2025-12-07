@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
-import { Search, BookOpen, TrendingUp, Clock, GraduationCap, Calculator } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, GraduationCap, Calculator } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +60,16 @@ export default function Home() {
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim() || !fuse) return [];
-    return fuse.search(searchQuery).slice(0, 10).map(result => result.item);
+    const results = fuse.search(searchQuery).map(result => result.item);
+    
+    // Sort by course number (extract numeric part from code like "CIS*1300" -> 1300)
+    return results.sort((a, b) => {
+      const getCourseNumber = (code: string) => {
+        const match = code.match(/\*(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+      return getCourseNumber(a.code) - getCourseNumber(b.code);
+    });
   }, [searchQuery, fuse]);
 
   const handleSelectCourse = (course: Course) => {
@@ -145,20 +154,6 @@ export default function Home() {
     return sortedSubjects.flatMap(([_, courses]) => courses.slice(0, 1));
   }, [courses]);
 
-  // Get recent courses from localStorage
-  const recentCourses = useMemo(() => {
-    try {
-      const recent = localStorage.getItem('recent_courses');
-      if (!recent) return [];
-      const codes = JSON.parse(recent) as string[];
-      return codes
-        .map(code => courses.find(c => c.code === code))
-        .filter((c): c is Course => c !== undefined)
-        .slice(0, 6);
-    } catch {
-      return [];
-    }
-  }, [courses]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-200">
@@ -274,7 +269,7 @@ export default function Home() {
               )}
 
               {!loading && searchQuery && searchResults.length > 0 && (
-                <div className="mt-4 border-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 shadow-lg max-h-96 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="mt-4 border-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 shadow-lg max-h-[600px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
                   {searchResults.map((course, index) => (
                     <button
                       key={course.id}
@@ -325,7 +320,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* Popular, Recent & Browse Sections */}
+          {/* Popular & Browse Sections */}
           {!loading && courses.length > 0 && !searchQuery && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
               {/* Popular Courses */}
@@ -364,43 +359,8 @@ export default function Home() {
                 </Card>
               )}
 
-              {/* Recent Courses or Browse by Subject */}
-              {recentCourses.length > 0 ? (
-                <Card className="border-2 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 transition-all duration-150">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 dark:text-white">
-                      <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      Recent Courses
-                    </CardTitle>
-                    <CardDescription className="dark:text-gray-400">Courses you&apos;ve viewed</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {recentCourses.map((course) => (
-                        <button
-                          key={course.id}
-                          onClick={() => handleSelectCourse(course)}
-                          className="w-full text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-100 border border-transparent hover:border-gray-200 dark:border-gray-700 group active:scale-[0.98]"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                {course.code}
-                              </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                                {course.title}
-                              </div>
-                            </div>
-                            <BookOpen className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors ml-2 flex-shrink-0" />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <BrowseBySubjectCard courses={courses} onSubjectClick={setSearchQuery} />
-              )}
+              {/* Browse by Subject */}
+              <BrowseBySubjectCard courses={courses} onSubjectClick={setSearchQuery} />
             </div>
           )}
 
