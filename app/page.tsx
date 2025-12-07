@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
-import { Search, BookOpen, TrendingUp, GraduationCap, Calculator } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, GraduationCap, Calculator, BarChart3 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,7 +89,7 @@ export default function Home() {
   };
 
   // Stats - fetch from API for real-time accuracy
-  const [stats, setStats] = useState({ totalCourses: 0, subjects: 0, totalCredits: 0 });
+  const [stats, setStats] = useState({ totalCourses: 0, subjects: 0, avgCredits: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
   
   useEffect(() => {
@@ -114,13 +114,14 @@ export default function Home() {
         
         const subjects = new Set(data.map((c: Course) => c.subject)).size;
         const totalCredits = data.reduce((sum: number, c: Course) => sum + (c.credits || 0), 0);
+        const avgCredits = actualCount > 0 ? totalCredits / actualCount : 0;
         
         console.log(`[Stats] Fetched ${data.length} courses (${actualCount} total), ${subjects} subjects`);
         
         setStats({
           totalCourses: actualCount,
           subjects,
-          totalCredits: Math.round(totalCredits),
+          avgCredits: Math.round(avgCredits * 10) / 10, // Round to 1 decimal
         });
       } catch (error) {
         console.error('[Stats] Error fetching stats:', error);
@@ -212,11 +213,11 @@ export default function Home() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <Calculator className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalCredits.toLocaleString()}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Total Credits</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCredits.toFixed(1)}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Avg Credits/Course</div>
                   </div>
                 </div>
               </CardContent>

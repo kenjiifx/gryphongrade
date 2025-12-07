@@ -21,7 +21,7 @@ export function BrowseBySubjectCard({ courses, onSubjectClick }: BrowseBySubject
       count: courses.filter(c => c.subject === subject).length,
     }));
 
-  const topSubjects = allSubjects.slice(0, 18);
+  const topSubjects = allSubjects.slice(0, 21); // 7 rows x 3 columns = 21 subjects
 
   return (
     <>
@@ -34,25 +34,25 @@ export function BrowseBySubjectCard({ courses, onSubjectClick }: BrowseBySubject
           <CardDescription className="dark:text-gray-400">Explore courses by department</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-2 min-h-[240px]">
+          <div className="grid grid-cols-3 gap-2.5">
             {topSubjects.map(({ subject, count }) => (
               <button
                 key={subject}
                 onClick={() => onSubjectClick(subject)}
-                className="text-left p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-100 border border-transparent hover:border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 group active:scale-95"
+                className="text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-100 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 group active:scale-95 bg-gray-50/50 dark:bg-gray-700/30"
               >
                 <div className="flex items-center justify-between">
-                  <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{subject}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({count})</span>
+                  <span className="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{subject}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 font-medium">({count})</span>
                 </div>
               </button>
             ))}
           </div>
-          {allSubjects.length > 18 && (
+          {allSubjects.length > 21 && (
             <div className="mt-4 pt-4 border-t dark:border-gray-700">
               <button
                 onClick={() => setShowAll(true)}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium w-full text-center transition-colors"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium w-full text-center transition-colors py-2"
               >
                 View all {allSubjects.length} subjects →
               </button>
