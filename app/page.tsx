@@ -3,13 +3,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
-import { Search, BookOpen, TrendingUp, Award, Calculator, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, Award, Calculator, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BrowseBySubjectCard } from '@/components/BrowseBySubjectCard';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { BrowseBySubjectCard, BrowseBySubjectCardRef } from '@/components/BrowseBySubjectCard';
 import { StatSkeleton } from '@/components/Skeleton';
 import { Course } from '@/lib/types';
 
@@ -22,15 +21,16 @@ export default function Home() {
   const router = useRouter();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoadedRef = useRef(false);
+  const browseSubjectsRef = useRef<BrowseBySubjectCardRef>(null);
 
-  // Optimized: Fetch courses only once on mount
+  // Optimized: Fetch courses only once on mount with better caching
   useEffect(() => {
     if (hasLoadedRef.current) return;
     
     async function fetchCourses() {
       try {
         const response = await fetch(`/api/courses`, {
-          next: { revalidate: 300 }, // Cache for 5 minutes
+          cache: 'force-cache',
         });
         if (!response.ok) {
           throw new Error('Failed to fetch courses');
@@ -47,7 +47,7 @@ export default function Home() {
     fetchCourses();
   }, []);
 
-  // Debounce search query to reduce lag on mobile
+  // Optimized debounce - reduced to 100ms for better responsiveness
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -55,7 +55,7 @@ export default function Home() {
     debounceTimerRef.current = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
       setSelectedIndex(-1);
-    }, 150);
+    }, 100);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -64,6 +64,7 @@ export default function Home() {
     };
   }, [searchQuery]);
 
+  // Memoize Fuse instance - only recreate when courses change
   const fuse = useMemo(() => {
     if (courses.length === 0) return null;
     return new Fuse(courses, {
@@ -75,6 +76,7 @@ export default function Home() {
     });
   }, [courses]);
 
+  // Optimized search results
   const searchResults = useMemo(() => {
     if (!debouncedSearchQuery.trim() || !fuse) return [];
     
@@ -105,7 +107,7 @@ export default function Home() {
     }
   };
 
-  // Optimized: Calculate stats from courses data instead of separate API call
+  // Optimized: Calculate stats from courses data
   const stats = useMemo(() => {
     if (courses.length === 0) {
       return { totalCourses: 0, subjects: 0, mostPopularSubject: '', mostPopularCount: 0 };
@@ -136,7 +138,7 @@ export default function Home() {
     };
   }, [courses]);
 
-  // Get popular courses (by subject frequency)
+  // Get popular courses
   const popularCourses = useMemo(() => {
     if (courses.length === 0) return [];
     const subjectCounts = new Map<string, Course[]>();
@@ -155,12 +157,16 @@ export default function Home() {
     return sortedSubjects.flatMap(([_, courses]) => courses.slice(0, 1));
   }, [courses]);
 
+  const handleBrowseCourses = () => {
+    browseSubjectsRef.current?.showAllSubjects();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Background decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
@@ -178,25 +184,19 @@ export default function Home() {
                   priority
                 />
               </div>
-              <span className="text-xl md:text-2xl font-bold text-white">GryphonGrade</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-900">GryphonGrade</span>
             </div>
-            <ThemeToggle />
           </div>
           
           {/* Hero Section */}
           <div className="text-center mb-12 md:mb-16 lg:mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium mb-6">
-              <Sparkles className="h-4 w-4" />
-              <span>University of Guelph Grade Calculator</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              A powerful suite of{' '}
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-                user-centric
-              </span>{' '}
-              grade tools
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              The software that{' '}
+              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                sparks your imagination
+              </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Calculate your grades, track your progress, and find out exactly what you need on your final exam
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -211,9 +211,10 @@ export default function Home() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button
+                onClick={handleBrowseCourses}
                 variant="outline"
                 size="lg"
-                className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800/50 px-8 py-6 text-lg font-semibold rounded-xl backdrop-blur-sm"
+                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-lg font-semibold rounded-xl"
               >
                 Browse Courses
               </Button>
@@ -222,58 +223,58 @@ export default function Home() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-            <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-700/50 hover:border-indigo-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-indigo-500/10">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
               <CardContent className="p-6">
                 {loading ? (
                   <StatSkeleton />
                 ) : (
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30">
-                      <BookOpen className="h-6 w-6 text-blue-400" />
+                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                      <BookOpen className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-white mb-1">
+                      <div className="text-3xl font-bold text-gray-900 mb-1">
                         {stats.totalCourses.toLocaleString()}
                       </div>
-                      <div className="text-sm text-gray-400">Total Courses</div>
+                      <div className="text-sm text-gray-600">Total Courses</div>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-            <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-700/50 hover:border-purple-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
               <CardContent className="p-6">
                 {loading ? (
                   <StatSkeleton />
                 ) : (
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30">
-                      <TrendingUp className="h-6 w-6 text-purple-400" />
+                    <div className="p-3 rounded-xl bg-purple-50 border border-purple-100">
+                      <TrendingUp className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-white mb-1">
+                      <div className="text-3xl font-bold text-gray-900 mb-1">
                         {stats.subjects}
                       </div>
-                      <div className="text-sm text-gray-400">Subjects</div>
+                      <div className="text-sm text-gray-600">Subjects</div>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-            <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-700/50 hover:border-pink-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-pink-500/10">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
               <CardContent className="p-6">
                 {loading ? (
                   <StatSkeleton />
                 ) : (
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-pink-500/20 to-pink-600/20 border border-pink-500/30">
-                      <Award className="h-6 w-6 text-pink-400" />
+                    <div className="p-3 rounded-xl bg-pink-50 border border-pink-100">
+                      <Award className="h-6 w-6 text-pink-600" />
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-white mb-1">
+                      <div className="text-3xl font-bold text-gray-900 mb-1">
                         {stats.mostPopularSubject || 'N/A'}
                       </div>
-                      <div className="text-sm text-gray-400">
+                      <div className="text-sm text-gray-600">
                         Most Popular ({stats.mostPopularCount} courses)
                       </div>
                     </div>
@@ -284,15 +285,15 @@ export default function Home() {
           </div>
 
           {/* Search Card */}
-          <Card className="bg-slate-900/60 backdrop-blur-md border-slate-700/50 shadow-2xl mb-8 md:mb-12">
+          <Card className="bg-white border border-gray-200 shadow-lg mb-8 md:mb-12">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-2xl md:text-3xl text-white">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
-                  <Search className="h-6 w-6 text-indigo-400" />
+              <CardTitle className="flex items-center gap-3 text-2xl md:text-3xl text-gray-900">
+                <div className="p-2 rounded-lg bg-indigo-50 border border-indigo-100">
+                  <Search className="h-6 w-6 text-indigo-600" />
                 </div>
                 Search Courses
               </CardTitle>
-              <CardDescription className="text-base text-gray-400 pt-2">
+              <CardDescription className="text-base text-gray-600 pt-2">
                 Enter a course code (e.g., CIS*1300) or course name
               </CardDescription>
             </CardHeader>
@@ -305,7 +306,7 @@ export default function Home() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full text-lg py-6 pl-14 pr-12 bg-slate-800/50 border-slate-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-xl transition-all"
+                  className="w-full text-lg py-6 pl-14 pr-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-xl transition-all"
                 />
                 <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 {searchQuery && (
@@ -315,7 +316,7 @@ export default function Home() {
                       setDebouncedSearchQuery('');
                       setSelectedIndex(-1);
                     }}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-700/50"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
                   >
                     ✕
                   </button>
@@ -323,7 +324,7 @@ export default function Home() {
               </div>
 
               {loading && (
-                <div className="mt-6 text-center text-gray-400 py-8">
+                <div className="mt-6 text-center text-gray-500 py-8">
                   <div className="inline-flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                     <span>Loading courses...</span>
@@ -332,32 +333,32 @@ export default function Home() {
               )}
 
               {!loading && debouncedSearchQuery && searchResults.length > 0 && (
-                <div className="mt-6 border border-slate-700 rounded-xl bg-slate-800/30 backdrop-blur-sm shadow-xl max-h-[600px] overflow-y-auto">
+                <div className="mt-6 border border-gray-200 rounded-xl bg-white shadow-xl max-h-[600px] overflow-y-auto">
                   {searchResults.map((course, index) => (
                     <button
                       key={course.id}
                       onClick={() => handleSelectCourse(course)}
-                      className={`w-full text-left px-5 py-4 hover:bg-slate-700/30 transition-all duration-150 border-b last:border-b-0 border-slate-700/50 ${
+                      className={`w-full text-left px-5 py-4 hover:bg-blue-50 transition-all duration-150 border-b last:border-b-0 border-gray-200 ${
                         index === selectedIndex 
-                          ? 'bg-indigo-500/20 border-l-4 border-l-indigo-500' 
-                          : 'hover:border-l-4 hover:border-l-indigo-500/50'
+                          ? 'bg-indigo-50 border-l-4 border-l-indigo-500' 
+                          : 'hover:border-l-4 hover:border-l-indigo-300'
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg bg-slate-700/50 flex-shrink-0">
-                          <BookOpen className="h-5 w-5 text-indigo-400" />
+                        <div className="p-2 rounded-lg bg-gray-100 flex-shrink-0">
+                          <BookOpen className="h-5 w-5 text-indigo-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-white flex items-center gap-2 flex-wrap">
+                          <div className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
                             {course.code}
-                            <span className="text-xs font-normal text-gray-400 bg-slate-700/50 px-2 py-1 rounded">
+                            <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">
                               {course.subject}
                             </span>
                           </div>
-                          <div className="text-sm text-gray-300 truncate mt-1">
+                          <div className="text-sm text-gray-600 truncate mt-1">
                             {course.title}
                           </div>
-                          <div className="text-xs text-gray-400 mt-2">
+                          <div className="text-xs text-gray-500 mt-2">
                             {course.credits} credits
                           </div>
                         </div>
@@ -368,7 +369,7 @@ export default function Home() {
               )}
 
               {!loading && courses.length === 0 && (
-                <div className="mt-6 text-center text-gray-400 py-8">
+                <div className="mt-6 text-center text-gray-500 py-8">
                   <div className="mb-2">⏳ No courses loaded yet.</div>
                   <div className="text-sm">
                     The course scraper is still running. This takes 10-30 minutes.
@@ -377,7 +378,7 @@ export default function Home() {
               )}
               
               {!loading && courses.length > 0 && debouncedSearchQuery && searchResults.length === 0 && (
-                <div className="mt-6 text-center text-gray-400 py-8">
+                <div className="mt-6 text-center text-gray-500 py-8">
                   No courses found. Try a different search term.
                 </div>
               )}
@@ -389,15 +390,15 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8">
               {/* Popular Courses */}
               {popularCourses.length > 0 && (
-                <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-700/50 hover:border-purple-500/50 transition-all duration-200">
+                <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-white">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-                        <TrendingUp className="h-5 w-5 text-purple-400" />
+                    <CardTitle className="flex items-center gap-3 text-gray-900">
+                      <div className="p-2 rounded-lg bg-purple-50 border border-purple-100">
+                        <TrendingUp className="h-5 w-5 text-purple-600" />
                       </div>
                       Popular Courses
                     </CardTitle>
-                    <CardDescription className="text-gray-400">Most common subjects</CardDescription>
+                    <CardDescription className="text-gray-600">Most common subjects</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -405,18 +406,18 @@ export default function Home() {
                         <button
                           key={course.id}
                           onClick={() => handleSelectCourse(course)}
-                          className="w-full text-left p-4 rounded-lg hover:bg-slate-800/50 transition-all duration-150 border border-transparent hover:border-indigo-500/30 group"
+                          className="w-full text-left p-4 rounded-lg hover:bg-gray-50 transition-all duration-150 border border-transparent hover:border-indigo-200 group"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-white group-hover:text-indigo-400 transition-colors">
+                              <div className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                                 {course.code}
                               </div>
-                              <div className="text-sm text-gray-300 truncate mt-1">
+                              <div className="text-sm text-gray-600 truncate mt-1">
                                 {course.title}
                               </div>
                             </div>
-                            <BookOpen className="h-4 w-4 text-gray-500 group-hover:text-indigo-400 transition-colors ml-2 flex-shrink-0" />
+                            <BookOpen className="h-4 w-4 text-gray-400 group-hover:text-indigo-600 transition-colors ml-2 flex-shrink-0" />
                           </div>
                         </button>
                       ))}
@@ -426,15 +427,19 @@ export default function Home() {
               )}
 
               {/* Browse by Subject */}
-              <BrowseBySubjectCard courses={courses} onSubjectClick={setSearchQuery} />
+              <BrowseBySubjectCard 
+                ref={browseSubjectsRef}
+                courses={courses} 
+                onSubjectClick={setSearchQuery} 
+              />
             </div>
           )}
 
           {/* Quick Tips */}
           {!loading && courses.length > 0 && !debouncedSearchQuery && (
             <div className="mt-8 md:mt-12 text-center">
-              <div className="inline-flex items-center gap-3 text-sm text-gray-400 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-6 py-3 rounded-full">
-                <Calculator className="h-5 w-5 text-indigo-400" />
+              <div className="inline-flex items-center gap-3 text-sm text-gray-600 bg-white border border-gray-200 px-6 py-3 rounded-full shadow-sm">
+                <Calculator className="h-5 w-5 text-indigo-600" />
                 <span>Tip: Search by course code or name, then customize weightings and calculate your grades!</span>
               </div>
             </div>

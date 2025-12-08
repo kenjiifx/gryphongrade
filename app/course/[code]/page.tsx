@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WeightEditor } from '@/components/WeightEditor';
 import { GradeCalculator } from '@/components/GradeCalculator';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { Course, AssessmentComponent } from '@/lib/types';
 
 export default function CoursePage() {
@@ -51,9 +50,9 @@ export default function CoursePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-200">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-gray-600 dark:text-gray-300">Loading course...</div>
+          <div className="text-lg text-gray-600">Loading course...</div>
         </div>
       </div>
     );
@@ -61,14 +60,14 @@ export default function CoursePage() {
 
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-200">
-        <Card className="max-w-md dark:border-gray-700 dark:bg-gray-800">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <Card className="max-w-md bg-white border border-gray-200 shadow-lg">
           <CardHeader>
-            <CardTitle className="dark:text-white">Course Not Found</CardTitle>
-            <CardDescription className="dark:text-gray-400">{error || 'The requested course could not be found'}</CardDescription>
+            <CardTitle className="text-gray-900">Course Not Found</CardTitle>
+            <CardDescription className="text-gray-600">{error || 'The requested course could not be found'}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push('/')} variant="outline" className="transition-all duration-100 active:scale-95 dark:border-gray-600">
+            <Button onClick={() => router.push('/')} variant="outline" className="transition-all duration-100 active:scale-95 border-gray-300">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Search
             </Button>
@@ -79,38 +78,37 @@ export default function CoursePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
             onClick={() => router.push('/')}
-            className="transition-all duration-100 active:scale-95"
+            className="transition-all duration-100 active:scale-95 text-gray-700 hover:bg-gray-100"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Search
           </Button>
-          <ThemeToggle />
         </div>
 
         {/* Course Header */}
-        <Card className="mb-6 dark:border-gray-700 dark:bg-gray-800">
+        <Card className="mb-6 bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-3xl mb-2 dark:text-white">{course.code}</CardTitle>
-                <CardDescription className="text-lg dark:text-gray-300">{course.title}</CardDescription>
+                <CardTitle className="text-3xl mb-2 text-gray-900">{course.code}</CardTitle>
+                <CardDescription className="text-lg text-gray-600">{course.title}</CardDescription>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Credits</div>
-                <div className="text-2xl font-semibold dark:text-white">{course.credits}</div>
+                <div className="text-sm text-gray-500">Credits</div>
+                <div className="text-2xl font-semibold text-gray-900">{course.credits}</div>
               </div>
             </div>
           </CardHeader>
           {course.description && (
             <CardContent>
-              <div className="prose max-w-none dark:prose-invert">
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{course.description}</p>
+              <div className="prose max-w-none">
+                <p className="text-gray-700 whitespace-pre-wrap">{course.description}</p>
               </div>
             </CardContent>
           )}

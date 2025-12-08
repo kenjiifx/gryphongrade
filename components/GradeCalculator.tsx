@@ -120,10 +120,10 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left Panel - Grade Inputs */}
-      <Card className="dark:border-gray-700 dark:bg-gray-800">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Enter Your Grades</CardTitle>
-          <CardDescription>Input your scores for each assessment</CardDescription>
+          <CardTitle className="text-gray-900">Enter Your Grades</CardTitle>
+          <CardDescription className="text-gray-600">Input your scores for each assessment</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {weightings.map((weighting) => {
@@ -137,37 +137,37 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
             const contribution = (percent * weighting.weight) / 100;
 
             return (
-              <div key={weighting.name} className="p-4 border rounded-lg dark:border-gray-700 dark:bg-gray-700/30 space-y-3">
+              <div key={weighting.name} className="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="font-semibold">{weighting.name}</Label>
-                  <span className="text-sm text-gray-500">{weighting.weight}%</span>
+                  <Label className="font-semibold text-gray-900">{weighting.name}</Label>
+                  <span className="text-sm text-gray-600">{weighting.weight}%</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-gray-500 dark:text-gray-400">Earned</Label>
+                    <Label className="text-xs text-gray-600">Earned</Label>
                     <Input
                       type="number"
                       value={grade.earnedScore || ''}
                       onChange={(e) => updateGrade(weighting.name, 'earnedScore', parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       step="0.01"
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="bg-white border-gray-300"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-gray-500 dark:text-gray-400">Out of</Label>
+                    <Label className="text-xs text-gray-600">Out of</Label>
                     <Input
                       type="number"
                       value={grade.maxScore || ''}
                       onChange={(e) => updateGrade(weighting.name, 'maxScore', parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       step="0.01"
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="bg-white border-gray-300"
                     />
                   </div>
                 </div>
                 {grade.maxScore > 0 && (
-                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                  <div className="text-sm text-gray-700">
                     <div className="flex justify-between">
                       <span>Grade: {percent.toFixed(1)}%</span>
                       <span>Contribution: {contribution.toFixed(2)}%</span>
@@ -182,17 +182,17 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
 
       {/* Right Panel - Summary & Calculator */}
       <div className="space-y-6">
-        <Card className="dark:border-gray-700 dark:bg-gray-800">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="dark:text-white">Current Grade</CardTitle>
-            <CardDescription>Based on completed assessments</CardDescription>
+            <CardTitle className="text-gray-900">Current Grade</CardTitle>
+            <CardDescription className="text-gray-600">Based on completed assessments</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2 transition-all duration-300">
+              <div className="text-5xl font-bold text-gray-900 mb-2 transition-all duration-300">
                 {current.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-600">
                 {completed.toFixed(1)}% of course completed
               </div>
               {current >= 80 && (
@@ -207,12 +207,12 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
               )}
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm dark:text-gray-300">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Completed</span>
                 <span>{completed.toFixed(1)}%</span>
               </div>
               <Progress value={completed} className="h-2" />
-              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between text-sm text-gray-600">
                 <span>Remaining</span>
                 <span>{remaining.toFixed(1)}%</span>
               </div>
@@ -220,14 +220,14 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
           </CardContent>
         </Card>
 
-        <Card className="dark:border-gray-700 dark:bg-gray-800">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="dark:text-white">Final Exam Calculator</CardTitle>
-            <CardDescription>What do you need on your final?</CardDescription>
+            <CardTitle className="text-gray-900">Final Exam Calculator</CardTitle>
+            <CardDescription className="text-gray-600">What do you need on your final?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Target Grade (%)</Label>
+              <Label className="text-gray-900">Target Grade (%)</Label>
               <Input
                 type="number"
                 value={targetGrade}
@@ -235,31 +235,31 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
                 min="0"
                 max="100"
                 step="0.1"
-                className="mt-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="mt-2 bg-white border-gray-300"
               />
             </div>
             {finalCalc ? (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">To achieve {targetGrade}% overall:</div>
-                <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-1">
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-sm text-gray-700 mb-2">To achieve {targetGrade}% overall:</div>
+                <div className="text-3xl font-bold text-blue-700 mb-1">
                   {finalCalc.required.toFixed(1)}%
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-xs text-gray-600">
                   on your final exam ({finalCalc.weight}% of grade)
                 </div>
                 {finalCalc.required > 100 && (
-                  <div className="mt-2 text-sm text-red-600 dark:text-red-400 font-semibold">
+                  <div className="mt-2 text-sm text-red-600 font-semibold">
                     ⚠️ This target may not be achievable
                   </div>
                 )}
                 {finalCalc.required < 0 && (
-                  <div className="mt-2 text-sm text-green-600 dark:text-green-400 font-semibold">
+                  <div className="mt-2 text-sm text-green-600 font-semibold">
                     ✓ You&apos;ve already exceeded this target!
                   </div>
                 )}
               </div>
             ) : (
-              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 text-center">
                 No final exam component found in weightings
               </div>
             )}

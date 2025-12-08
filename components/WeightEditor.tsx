@@ -78,12 +78,12 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
   const weightDifference = 100 - totalWeight;
 
   return (
-    <Card className="dark:border-gray-700 dark:bg-gray-800">
+    <Card className="bg-white border border-gray-200 shadow-sm">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="dark:text-white">Assessment Weightings</CardTitle>
-            <CardDescription className="dark:text-gray-400">Edit component names and weights</CardDescription>
+            <CardTitle className="text-gray-900">Assessment Weightings</CardTitle>
+            <CardDescription className="text-gray-600">Edit component names and weights</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button
@@ -91,6 +91,7 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
               size="sm"
               onClick={resetToDefault}
               disabled={!hasChanges && JSON.stringify(weightings) === JSON.stringify(defaultWeightings)}
+              className="border-gray-300"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
@@ -100,6 +101,7 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
               size="sm"
               onClick={saveToLocal}
               disabled={!hasChanges}
+              className="bg-indigo-600 hover:bg-indigo-700"
             >
               Save
             </Button>
@@ -108,12 +110,12 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
       </CardHeader>
       <CardContent className="space-y-4">
         {weightings.map((weighting, index) => (
-          <div key={index} className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
+          <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
             <GripVertical className="h-5 w-5 text-gray-400 flex-shrink-0" />
             <Input
               value={weighting.name}
               onChange={(e) => updateWeighting(index, 'name', e.target.value)}
-              className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="flex-1 bg-white border-gray-300"
               placeholder="Component name"
             />
             <div className="flex items-center gap-2">
@@ -121,18 +123,18 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
                 type="number"
                 value={weighting.weight}
                 onChange={(e) => updateWeighting(index, 'weight', parseFloat(e.target.value) || 0)}
-                className="w-20 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-20 bg-white border-gray-300"
                 min="0"
                 max="100"
                 step="1"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-300 w-8">%</span>
+              <span className="text-sm text-gray-600 w-8">%</span>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => removeComponent(index)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-all duration-100 active:scale-95"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-100 active:scale-95"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -142,21 +144,21 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
         <Button
           variant="outline"
           onClick={addComponent}
-          className="w-full transition-all duration-100 active:scale-95 dark:border-gray-600"
+          className="w-full transition-all duration-100 active:scale-95 border-gray-300"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Component
         </Button>
 
-        <div className="pt-4 border-t dark:border-gray-700">
+        <div className="pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-300">Total Weight:</span>
-            <span className={`font-semibold ${totalWeight === 100 ? 'text-green-600 dark:text-green-400' : totalWeight > 100 ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
+            <span className="text-gray-600">Total Weight:</span>
+            <span className={`font-semibold ${totalWeight === 100 ? 'text-green-600' : totalWeight > 100 ? 'text-red-600' : 'text-orange-600'}`}>
               {totalWeight}%
             </span>
           </div>
           {totalWeight !== 100 && (
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className="mt-2 text-xs text-gray-500">
               {weightDifference > 0
                 ? `Add ${weightDifference}% to reach 100%`
                 : `Remove ${Math.abs(weightDifference)}% to reach 100%`}
