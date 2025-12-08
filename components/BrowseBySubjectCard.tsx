@@ -25,34 +25,36 @@ export function BrowseBySubjectCard({ courses, onSubjectClick }: BrowseBySubject
 
   return (
     <>
-      <Card className="border-2 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 transition-all duration-150">
+      <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-700/50 hover:border-green-500/50 transition-all duration-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 dark:text-white">
-            <BookOpen className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <CardTitle className="flex items-center gap-3 text-white">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
+              <BookOpen className="h-5 w-5 text-green-400" />
+            </div>
             Browse by Subject
           </CardTitle>
-          <CardDescription className="dark:text-gray-400">Explore courses by department</CardDescription>
+          <CardDescription className="text-gray-400">Explore courses by department</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {topSubjects.map(({ subject, count }) => (
               <button
                 key={subject}
                 onClick={() => onSubjectClick(subject)}
-                className="text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-100 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 group active:scale-95 bg-gray-50/50 dark:bg-gray-700/30"
+                className="text-left p-3 rounded-lg hover:bg-slate-800/50 transition-all duration-150 border border-slate-700/50 hover:border-green-500/50 text-sm font-medium text-gray-300 hover:text-green-400 group bg-slate-800/30"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{subject}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 font-medium">({count})</span>
+                  <span className="font-semibold group-hover:text-green-400 transition-colors truncate">{subject}</span>
+                  <span className="text-xs text-gray-500 ml-2 font-medium flex-shrink-0">({count})</span>
                 </div>
               </button>
             ))}
           </div>
           {allSubjects.length > 21 && (
-            <div className="mt-4 pt-4 border-t dark:border-gray-700">
+            <div className="mt-4 pt-4 border-t border-slate-700/50">
               <button
                 onClick={() => setShowAll(true)}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium w-full text-center transition-colors py-2"
+                className="text-sm text-green-400 hover:text-green-300 font-medium w-full text-center transition-colors py-2"
               >
                 View all {allSubjects.length} subjects →
               </button>
@@ -62,11 +64,11 @@ export function BrowseBySubjectCard({ courses, onSubjectClick }: BrowseBySubject
       </Card>
 
       <Dialog open={showAll} onOpenChange={setShowAll}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-900 border-slate-700">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">All Subjects ({allSubjects.length})</DialogTitle>
+            <DialogTitle className="text-white">All Subjects ({allSubjects.length})</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 gap-2 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
             {allSubjects.map(({ subject, count }) => (
               <button
                 key={subject}
@@ -74,11 +76,11 @@ export function BrowseBySubjectCard({ courses, onSubjectClick }: BrowseBySubject
                   onSubjectClick(subject);
                   setShowAll(false);
                 }}
-                className="text-left p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-100 border border-transparent hover:border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 group active:scale-95"
+                className="text-left p-2 rounded-lg hover:bg-slate-800/50 transition-all duration-150 border border-transparent hover:border-green-500/50 text-sm font-medium text-gray-300 hover:text-green-400 group"
               >
                 <div className="flex items-center justify-between">
-                  <span className="group-hover:text-blue-600 transition-colors">{subject}</span>
-                  <span className="text-xs text-gray-400 ml-1">({count})</span>
+                  <span className="group-hover:text-green-400 transition-colors truncate">{subject}</span>
+                  <span className="text-xs text-gray-500 ml-1 flex-shrink-0">({count})</span>
                 </div>
               </button>
             ))}

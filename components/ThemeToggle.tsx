@@ -11,8 +11,8 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    // Default to dark theme for modern look
+    const initialTheme = savedTheme || 'dark';
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
@@ -37,13 +37,13 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="w-10 h-10 rounded-full transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+      className="w-10 h-10 rounded-lg transition-all duration-200 hover:bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm"
       aria-label="Toggle theme"
     >
       {theme === 'light' ? (
-        <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300 transition-transform duration-200" />
+        <Moon className="h-5 w-5 text-gray-300 transition-transform duration-200" />
       ) : (
-        <Sun className="h-5 w-5 text-yellow-500 transition-transform duration-200" />
+        <Sun className="h-5 w-5 text-yellow-400 transition-transform duration-200" />
       )}
     </Button>
   );

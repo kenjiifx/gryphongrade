@@ -21,12 +21,24 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
     const saved = localStorage.getItem(`grades_${courseCode}`);
     if (saved) {
       try {
-        setGrades(JSON.parse(saved));
+        const savedGrades = JSON.parse(saved);
+        // Filter out grades for components that no longer exist
+        const validGrades: Record<string, GradeEntry> = {};
+        weightings.forEach(weighting => {
+          if (savedGrades[weighting.name]) {
+            validGrades[weighting.name] = savedGrades[weighting.name];
+          }
+        });
+        setGrades(validGrades);
+        if (Object.keys(validGrades).length !== Object.keys(savedGrades).length) {
+          // Some components were removed, update localStorage
+          localStorage.setItem(`grades_${courseCode}`, JSON.stringify(validGrades));
+        }
       } catch (e) {
         console.error('Error loading saved grades:', e);
       }
     }
-  }, [courseCode]);
+  }, [courseCode, weightings]);
 
   const updateGrade = (componentName: string, field: 'earnedScore' | 'maxScore', value: number) => {
     const updated = { ...grades };
@@ -81,7 +93,19 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
     if (!finalComponent || remaining === 0) return null;
 
     const finalWeight = finalComponent.weight;
-    const neededPoints = targetGrade - (current * completed / 100);
+    // Calculate current weighted points out of 100 total
+    let totalWeightedPoints = 0;
+    weightings.forEach(weighting => {
+      const grade = grades[weighting.name];
+      if (grade && grade.maxScore > 0) {
+        const percent = (grade.earnedScore / grade.maxScore) * 100;
+        const weighted = (percent * weighting.weight) / 100;
+        totalWeightedPoints += weighted;
+      }
+    });
+    
+    // Calculate needed points and required final exam percentage
+    const neededPoints = targetGrade - totalWeightedPoints;
     const requiredFinal = (neededPoints / finalWeight) * 100;
 
     return {
