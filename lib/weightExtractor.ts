@@ -69,8 +69,12 @@ export function extractWeightings(description: string): AssessmentComponent[] {
     return components;
   }
 
-  // Fallback: return default final exam only
-  return [{ name: 'Final Exam', weight: 100 }];
+  // Fallback: return sensible defaults instead of 100% final exam
+  return [
+    { name: 'Assignments', weight: 30 },
+    { name: 'Midterm', weight: 30 },
+    { name: 'Final Exam', weight: 40 },
+  ];
 }
 
 function normalizeComponentName(name: string): string {

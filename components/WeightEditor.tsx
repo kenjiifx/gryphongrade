@@ -48,7 +48,14 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
   };
 
   const addComponent = () => {
-    const newComponent: AssessmentComponent = { name: 'New Component', weight: 0 };
+    // Generate unique name if "New Component" already exists
+    let componentName = 'New Component';
+    let counter = 1;
+    while (weightings.some(w => w.name === componentName)) {
+      componentName = `New Component ${counter}`;
+      counter++;
+    }
+    const newComponent: AssessmentComponent = { name: componentName, weight: 0 };
     const updated = [...weightings, newComponent];
     setWeightings(updated);
     setHasChanges(true);
@@ -56,10 +63,23 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
   };
 
   const removeComponent = (index: number) => {
+    const componentToRemove = weightings[index];
     const updated = weightings.filter((_, i) => i !== index);
     setWeightings(updated);
     setHasChanges(true);
     onWeightingsChange(updated);
+    
+    // Clean up grades for removed component
+    try {
+      const savedGrades = localStorage.getItem(`grades_${courseCode}`);
+      if (savedGrades) {
+        const grades = JSON.parse(savedGrades);
+        delete grades[componentToRemove.name];
+        localStorage.setItem(`grades_${courseCode}`, JSON.stringify(grades));
+      }
+    } catch (e) {
+      // Ignore errors
+    }
   };
 
   const resetToDefault = () => {
@@ -101,21 +121,41 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
               size="sm"
               onClick={saveToLocal}
               disabled={!hasChanges}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save
+              {hasChanges ? '💾 Save' : '✓ Saved'}
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {weightings.map((weighting, index) => (
-          <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
-            <GripVertical className="h-5 w-5 text-gray-400 flex-shrink-0" />
+          <div 
+            key={`${weighting.name}-${index}`} 
+            className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all duration-200 hover:shadow-sm group"
+          >
+            <GripVertical className="h-5 w-5 text-gray-400 flex-shrink-0 group-hover:text-gray-600 transition-colors" />
             <Input
               value={weighting.name}
-              onChange={(e) => updateWeighting(index, 'name', e.target.value)}
-              className="flex-1 bg-white border-gray-300"
+              onChange={(e) => {
+                const oldName = weighting.name;
+                updateWeighting(index, 'name', e.target.value);
+                // Update grades when component name changes
+                try {
+                  const savedGrades = localStorage.getItem(`grades_${courseCode}`);
+                  if (savedGrades) {
+                    const grades = JSON.parse(savedGrades);
+                    if (grades[oldName]) {
+                      grades[e.target.value] = { ...grades[oldName], componentName: e.target.value };
+                      delete grades[oldName];
+                      localStorage.setItem(`grades_${courseCode}`, JSON.stringify(grades));
+                    }
+                  }
+                } catch (e) {
+                  // Ignore errors
+                }
+              }}
+              className="flex-1 bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
               placeholder="Component name"
             />
             <div className="flex items-center gap-2">
@@ -123,7 +163,7 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
                 type="number"
                 value={weighting.weight}
                 onChange={(e) => updateWeighting(index, 'weight', parseFloat(e.target.value) || 0)}
-                className="w-20 bg-white border-gray-300"
+                className="w-20 bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
                 min="0"
                 max="100"
                 step="1"
@@ -134,7 +174,7 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
               variant="ghost"
               size="icon"
               onClick={() => removeComponent(index)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-100 active:scale-95"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 active:scale-95 opacity-0 group-hover:opacity-100"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -144,7 +184,7 @@ export function WeightEditor({ courseCode, defaultWeightings, onWeightingsChange
         <Button
           variant="outline"
           onClick={addComponent}
-          className="w-full transition-all duration-100 active:scale-95 border-gray-300"
+          className="w-full transition-all duration-200 active:scale-95 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Component

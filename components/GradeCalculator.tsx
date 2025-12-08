@@ -19,23 +19,65 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
   useEffect(() => {
     // Initialize grades from localStorage (per course)
     const saved = localStorage.getItem(`grades_${courseCode}`);
+    const validGrades: Record<string, GradeEntry> = {};
+    
+    // Always sync with current weightings
+    weightings.forEach(weighting => {
+      if (saved) {
+        try {
+          const savedGrades = JSON.parse(saved);
+          if (savedGrades[weighting.name]) {
+            validGrades[weighting.name] = {
+              ...savedGrades[weighting.name],
+              weight: weighting.weight, // Update weight from current weightings
+            };
+          } else {
+            // New component - initialize empty
+            validGrades[weighting.name] = {
+              componentName: weighting.name,
+              earnedScore: 0,
+              maxScore: 0,
+              weight: weighting.weight,
+            };
+          }
+        } catch (e) {
+          // If parsing fails, initialize empty
+          validGrades[weighting.name] = {
+            componentName: weighting.name,
+            earnedScore: 0,
+            maxScore: 0,
+            weight: weighting.weight,
+          };
+        }
+      } else {
+        // No saved grades - initialize empty
+        validGrades[weighting.name] = {
+          componentName: weighting.name,
+          earnedScore: 0,
+          maxScore: 0,
+          weight: weighting.weight,
+        };
+      }
+    });
+    
+    setGrades(validGrades);
+    
+    // Update localStorage with cleaned grades
     if (saved) {
       try {
         const savedGrades = JSON.parse(saved);
-        // Filter out grades for components that no longer exist
-        const validGrades: Record<string, GradeEntry> = {};
+        const cleanedGrades: Record<string, GradeEntry> = {};
         weightings.forEach(weighting => {
           if (savedGrades[weighting.name]) {
-            validGrades[weighting.name] = savedGrades[weighting.name];
+            cleanedGrades[weighting.name] = {
+              ...savedGrades[weighting.name],
+              weight: weighting.weight,
+            };
           }
         });
-        setGrades(validGrades);
-        if (Object.keys(validGrades).length !== Object.keys(savedGrades).length) {
-          // Some components were removed, update localStorage
-          localStorage.setItem(`grades_${courseCode}`, JSON.stringify(validGrades));
-        }
+        localStorage.setItem(`grades_${courseCode}`, JSON.stringify(cleanedGrades));
       } catch (e) {
-        console.error('Error loading saved grades:', e);
+        // Ignore errors
       }
     }
   }, [courseCode, weightings]);
@@ -126,7 +168,7 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
           <CardDescription className="text-gray-600">Input your scores for each assessment</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {weightings.map((weighting) => {
+          {weightings.map((weighting, index) => {
             const grade = grades[weighting.name] || {
               componentName: weighting.name,
               earnedScore: 0,
@@ -137,40 +179,43 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
             const contribution = (percent * weighting.weight) / 100;
 
             return (
-              <div key={weighting.name} className="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+              <div 
+                key={`${weighting.name}-${index}`} 
+                className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white hover:shadow-md transition-all duration-200 space-y-3 group"
+              >
                 <div className="flex items-center justify-between">
-                  <Label className="font-semibold text-gray-900">{weighting.name}</Label>
-                  <span className="text-sm text-gray-600">{weighting.weight}%</span>
+                  <Label className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{weighting.name}</Label>
+                  <span className="text-sm text-gray-600 font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded">{weighting.weight}%</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-gray-600">Earned</Label>
+                    <Label className="text-xs text-gray-600 font-medium">Earned</Label>
                     <Input
                       type="number"
                       value={grade.earnedScore || ''}
                       onChange={(e) => updateGrade(weighting.name, 'earnedScore', parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       step="0.01"
-                      className="bg-white border-gray-300"
+                      className="bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-gray-600">Out of</Label>
+                    <Label className="text-xs text-gray-600 font-medium">Out of</Label>
                     <Input
                       type="number"
                       value={grade.maxScore || ''}
                       onChange={(e) => updateGrade(weighting.name, 'maxScore', parseFloat(e.target.value) || 0)}
                       placeholder="0"
                       step="0.01"
-                      className="bg-white border-gray-300"
+                      className="bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
                     />
                   </div>
                 </div>
                 {grade.maxScore > 0 && (
-                  <div className="text-sm text-gray-700">
-                    <div className="flex justify-between">
-                      <span>Grade: {percent.toFixed(1)}%</span>
-                      <span>Contribution: {contribution.toFixed(2)}%</span>
+                  <div className="text-sm text-gray-700 pt-2 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Grade: <span className="text-indigo-600 font-semibold">{percent.toFixed(1)}%</span></span>
+                      <span className="font-medium">Contribution: <span className="text-purple-600 font-semibold">{contribution.toFixed(2)}%</span></span>
                     </div>
                   </div>
                 )}
@@ -189,20 +234,25 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <div className="text-5xl font-bold text-gray-900 mb-2 transition-all duration-300">
+              <div className="text-5xl font-bold text-gray-900 mb-2 transition-all duration-300 transform hover:scale-105">
                 {current.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 mb-4">
                 {completed.toFixed(1)}% of course completed
               </div>
               {current >= 80 && (
-                <div className="mt-2 text-xs text-green-600 font-semibold animate-in fade-in">
+                <div className="mt-2 text-sm text-green-600 font-semibold animate-in fade-in bg-green-50 px-4 py-2 rounded-lg inline-block">
                   🎉 Great job!
                 </div>
               )}
               {current >= 70 && current < 80 && (
-                <div className="mt-2 text-xs text-blue-600 font-semibold animate-in fade-in">
+                <div className="mt-2 text-sm text-blue-600 font-semibold animate-in fade-in bg-blue-50 px-4 py-2 rounded-lg inline-block">
                   👍 Keep it up!
+                </div>
+              )}
+              {current > 0 && current < 70 && (
+                <div className="mt-2 text-sm text-orange-600 font-semibold animate-in fade-in bg-orange-50 px-4 py-2 rounded-lg inline-block">
+                  💪 You've got this!
                 </div>
               )}
             </div>
@@ -239,27 +289,32 @@ export function GradeCalculator({ courseCode, weightings }: GradeCalculatorProps
               />
             </div>
             {finalCalc ? (
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-sm text-gray-700 mb-2">To achieve {targetGrade}% overall:</div>
-                <div className="text-3xl font-bold text-blue-700 mb-1">
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 shadow-md hover:shadow-lg transition-all duration-200">
+                <div className="text-sm text-gray-700 mb-3 font-medium">To achieve {targetGrade}% overall:</div>
+                <div className="text-4xl font-bold text-blue-700 mb-2 transform hover:scale-105 transition-transform">
                   {finalCalc.required.toFixed(1)}%
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-sm text-gray-600 mb-4">
                   on your final exam ({finalCalc.weight}% of grade)
                 </div>
                 {finalCalc.required > 100 && (
-                  <div className="mt-2 text-sm text-red-600 font-semibold">
+                  <div className="mt-3 text-sm text-red-600 font-semibold bg-red-50 px-4 py-2 rounded-lg border border-red-200">
                     ⚠️ This target may not be achievable
                   </div>
                 )}
                 {finalCalc.required < 0 && (
-                  <div className="mt-2 text-sm text-green-600 font-semibold">
+                  <div className="mt-3 text-sm text-green-600 font-semibold bg-green-50 px-4 py-2 rounded-lg border border-green-200">
                     ✓ You&apos;ve already exceeded this target!
+                  </div>
+                )}
+                {finalCalc.required >= 0 && finalCalc.required <= 100 && (
+                  <div className="mt-3 text-sm text-indigo-600 font-semibold bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-200">
+                    ✨ This is achievable! Keep working hard!
                   </div>
                 )}
               </div>
             ) : (
-              <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 text-center">
+              <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 text-center border border-gray-200">
                 No final exam component found in weightings
               </div>
             )}

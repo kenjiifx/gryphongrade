@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WeightEditor } from '@/components/WeightEditor';
 import { GradeCalculator } from '@/components/GradeCalculator';
+import { Navbar } from '@/components/Navbar';
 import { Course, AssessmentComponent } from '@/lib/types';
 
 export default function CoursePage() {
@@ -28,7 +29,23 @@ export default function CoursePage() {
         }
         const data = await response.json();
         setCourse(data);
-        setWeightings(data.weightings || []);
+        // If no weightings found, use sensible defaults instead of 100% final exam
+        if (!data.weightings || data.weightings.length === 0) {
+          setWeightings([
+            { name: 'Assignments', weight: 30 },
+            { name: 'Midterm', weight: 30 },
+            { name: 'Final Exam', weight: 40 },
+          ]);
+        } else if (data.weightings.length === 1 && data.weightings[0].weight === 100) {
+          // If it's just "Final Exam 100%", replace with better defaults
+          setWeightings([
+            { name: 'Assignments', weight: 30 },
+            { name: 'Midterm', weight: 30 },
+            { name: 'Final Exam', weight: 40 },
+          ]);
+        } else {
+          setWeightings(data.weightings);
+        }
         
         // Save to recent courses
         try {
@@ -79,17 +96,10 @@ export default function CoursePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Navbar */}
+      <Navbar />
+      
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/')}
-            className="transition-all duration-100 active:scale-95 text-gray-700 hover:bg-gray-100"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Search
-          </Button>
-        </div>
 
         {/* Course Header */}
         <Card className="mb-6 bg-white border border-gray-200 shadow-sm">

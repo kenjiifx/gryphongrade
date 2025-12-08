@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrowseBySubjectCard, BrowseBySubjectCardRef } from '@/components/BrowseBySubjectCard';
 import { StatSkeleton } from '@/components/Skeleton';
+import { Navbar } from '@/components/Navbar';
 import { Course } from '@/lib/types';
 
 export default function Home() {
@@ -169,35 +170,22 @@ export default function Home() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl"></div>
       </div>
 
+      {/* Navbar */}
+      <Navbar />
+
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8 md:mb-12">
-            <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 md:w-12 md:h-12">
-                <Image
-                  src="/logo.png"
-                  alt="GryphonGrade Logo"
-                  width={48}
-                  height={48}
-                  className="drop-shadow-lg"
-                  priority
-                />
-              </div>
-              <span className="text-xl md:text-2xl font-bold text-gray-900">GryphonGrade</span>
-            </div>
-          </div>
           
           {/* Hero Section */}
           <div className="text-center mb-12 md:mb-16 lg:mb-20">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              The software that{' '}
+              Calculate your grades{' '}
               <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                sparks your imagination
+                with confidence
               </span>
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Calculate your grades, track your progress, and find out exactly what you need on your final exam
+              Track your progress, customize assessment weightings, and find out exactly what you need on your final exam
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
